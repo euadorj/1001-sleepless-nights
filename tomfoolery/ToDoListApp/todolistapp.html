@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, textarea, select {
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+        }
+        button {
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .task-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .task {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .high { background-color: #ffcccc; }
+        .medium { background-color: #fff2cc; }
+        .low { background-color: #d9ead3; }
+        .due-date, .completion-date {
+            font-style: italic;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List</h1>
+    <form id="task-form">
+        <input type="text" id="task-title" placeholder="Task Title" required>
+        <textarea id="task-desc" placeholder="Description"></textarea>
+        <input type="datetime-local" id="task-due" required>
+        <select id="task-priority" required>
+            <option value="" disabled selected>Select Priority</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+        </select>
+        <select id="task-repeat">
+            <option value="" disabled selected>Repeat</option>
+            <option value="none">None</option>
+            <option value="hourly">Hourly</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="weekdays">Weekdays</option>
+            <option value="weekends">Weekends</option>
+            <option value="every2weeks">Every 2 Weeks</option>
+        </select>
+        <select id="task-early-reminder">
+            <option value="" disabled selected>Early Reminder</option>
+            <option value="none">None</option>
+            <option value="10min">10 minutes</option>
+            <option value="30min">30 minutes</option>
+            <option value="1hour">1 hour</option>
+            <option value="2hours">2 hours</option>
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+    <div id="task-container" class="task-container"></div>
+
+    <div id="reminderModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" style="float:right;cursor:pointer;">&times;</span>
+            <h2 id="modal-title"></h2>
+            <p id="modal-desc"></p>
+            <p class="due-date" id="modal-due-date"></p>
+            <p class="completion-date" id="modal-completion-date"></p>
+            <p id="modal-url"></p>
+        </div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function addTask(title, description, dueDate, priority, repeat, earlyReminder) {
+            const task = {
+                id: Date.now(),
+                title,
+                description,
+                dueDate,
+                priority,
+                status: 'Pending',
+                completionDate: null,
+                repeat,
+                earlyReminder
+            };
+            tasks.push(task);
+            saveTasks();
+            renderTasks();
+            setReminder(task);
+        }
+
+        function renderTasks() {
+            const taskContainer = document.getElementById('task-container');
+            taskContainer.innerHTML = '';
+            tasks.forEach(task => {
+                const taskDiv = document.createElement('div');
+                taskDiv.className = `task ${task.priority}`;
+                taskDiv.innerHTML = `
+                    <strong>${task.title}</strong> - ${task.description}
+                    <br><span class="due-date">Due: ${task.dueDate}</span>
+                    <br><small>Priority: ${task.priority}</small>
+                    <button onclick="deleteTask(${task.id})">Delete</button>
+                    <button onclick="updateTask(${task.id})">Update</button>
+                    <button onclick="showMoreInfo(${task.id})">More Info</button>
+                `;
+                if (task.completionDate) {
+                    taskDiv.innerHTML += `<br><span class="completion-date">Completed on: ${task.completionDate}</span>`;
+                }
+                taskContainer.appendChild(taskDiv);
+            });
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(task => task.id !== id);
+            saveTasks();
+            renderTasks();
+        }
+
+        function updateTask(id) {
+            const task = tasks.find(task => task.id === id);
+            if (task) {
+                const title = prompt("Update Title:", task.title);
+                const description = prompt("Update Description:", task.description);
+                const dueDate = prompt("Update Due Date:", task.dueDate);
+                const priority = prompt("Update Priority (high, medium, low):", task.priority);
+                const repeat = prompt("Update Repeat:", task.repeat);
+                const earlyReminder = prompt("Update Early Reminder:", task.earlyReminder);
+
+                if (title && dueDate && priority) {
+                    task.title = title;
+                    task.description = description;
+                    task.dueDate = dueDate;
+                    task.priority = priority;
+                    task.repeat = repeat;
+                    task.earlyReminder = earlyReminder;
+                    saveTasks();
+                    renderTasks();
+                }
+            }
+        }
+
+        function setReminder(task) {
+            const dueDate = new Date(task.dueDate).getTime();
+            const now = new Date().getTime();
+
+            if (dueDate > now) {
+                const delay = dueDate - now;
+                setTimeout(() => {
+                    alert(`Reminder: ${task.title}`);
+                    if (task.earlyReminder !== 'none') {
+                        const earlyDelay = getEarlyReminderDelay(task.earlyReminder);
+                        setTimeout(() => {
+                            alert(`Early Reminder: ${task.title}`);
+                        }, earlyDelay);
+                    }
+                    showModal(task);
+                }, delay);
+            }
+        }
+
+        function getEarlyReminderDelay(earlyReminder) {
+            const now = new Date().getTime();
+            switch (earlyReminder) {
+                case '10min':
+                    return 10 * 60 * 1000;
+                case '30min':
+                    return 30 * 60 * 1000;
+                case '1hour':
+                    return 60 * 60 * 1000;
+                case '2hours':
+                    return 2 * 60 * 60 * 1000;
+                default:
+                    return 0;
+            }
+        }
+
+        function showMoreInfo(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                document.getElementById('modal-title').innerText = task.title;
+                document.getElementById('modal-desc').innerText = task.description;
+                document.getElementById('modal-due-date').innerText = `Due: ${task.dueDate}`;
+                document.getElementById('modal-completion-date').innerText = task.completionDate ? `Completed on: ${task.completionDate}` : '';
+                document.getElementById('modal-url').innerText = `URL: ${task.url || 'N/A'}`;
+                document.getElementById('reminderModal').style.display = "block";
+            }
+        }
+
+        document.getElementById('closeModal').onclick = function() {
+            document.getElementById('reminderModal').style.display = "none";
+        }
+
+        document.getElementById('task-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-desc').value;
+            const dueDate = document.getElementById('task-due').value;
+            const priority = document.getElementById('task-priority').value;
+            const repeat = document.getElementById('task-repeat').value;
+            const earlyReminder = document.getElementById('task-early-reminder').value;
+
+            addTask(title, description, dueDate, priority, repeat, earlyReminder);
+            this.reset(); // Clear form fields
+        });
+
+        renderTasks(); // Initial render of tasks
+    </script>
+</body>
+</html>

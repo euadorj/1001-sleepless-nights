@@ -1,9 +1,9 @@
 WeatherBuddy 
 weather app
 fetch and display weather data and chance of rain from an external API, find user current location
-(OpenWeatherMap API)
+using NEA data -- NEA allows for accessing weather data without the need for an API key 
 chance of rain in current location
-Mockup in python 
+Mockup in js 
 
 
 input:

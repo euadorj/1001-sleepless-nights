@@ -1,9 +1,10 @@
 import requests
-from datetime import datetime 
+from datetime import datetime
+from geopy.distance import geodesic
 
 def get_user_location():
-    # Use a geolocation API to get the user's location based on their IP address
     try:
+        # Comment this block for testing with hardcoded values
         response = requests.get("https://ipinfo.io/json")
         data = response.json()
         
@@ -12,7 +13,6 @@ def get_user_location():
         if len(location) == 2:
             lat = float(location[0])
             lon = float(location[1])
-            ## debug test
             print(f"User's Location: Latitude = {lat}, Longitude = {lon}")  # Debugging line
             return (lat, lon)
         else:
@@ -22,19 +22,26 @@ def get_user_location():
         print(f"Error retrieving location: {e}")
         return None
 
-def fetch_rainfall_data(lat, lon):
-    # NEA API endpoint for rainfall data
+
+def fetch_stations():
     url = "https://api-open.data.gov.sg/v2/real-time/api/rainfall"
-    
-    # Make request to the rainfall API
+    response = requests.get(url)
+    if response.status_code == 200:
+        return {station['id']: (station['location']['latitude'], station['location']['longitude']) for station in response.json()["data"]["stations"]}
+    else:
+        print(f"Error fetching stations: {response.status_code}")
+        return {}
+
+def find_closest_station(user_location, stations):
+    closest_station_id = min(stations.keys(), key=lambda station_id: geodesic(user_location, stations[station_id]).meters)
+    return closest_station_id
+
+def fetch_rainfall_data(station_id):
+    url = "https://api-open.data.gov.sg/v2/real-time/api/rainfall"
     current_time = datetime.now()
     date_param = current_time.strftime("%Y-%m-%dT%H:%M:%S")
     
-    # Calling the API without an API key
-    params = {
-        'date': date_param
-    }
-    
+    params = {'date': date_param}
     response = requests.get(url, params=params)
     
     if response.status_code == 200:
@@ -43,18 +50,14 @@ def fetch_rainfall_data(lat, lon):
         print(f"Error: {response.status_code} - {response.text}")
         return None
 
-def analyze_rainfall_data(data):
+def analyze_rainfall_data(data, station_id):
     if data and 'data' in data:
         readings = data['data']['readings']
-        chance_of_rain = 0
         
         for reading in readings:
             for measurement in reading['data']:
-                if measurement['stationId'] == "S111":  # Assume using a specific station
-                    chance_of_rain = measurement['value']
-                    break
-        
-        return chance_of_rain > 0  # Returning True or False
+                if measurement['stationId'] == station_id:
+                    return measurement['value'] > 0  # Returning True if there's rain
     return False
 
 def suggest_umbrella(chance_of_rain, user_location):
@@ -66,9 +69,11 @@ def suggest_umbrella(chance_of_rain, user_location):
 def main():
     user_location = get_user_location()
     if user_location is not None:
-        rainfall_data = fetch_rainfall_data(*user_location)
-        chance_of_rain = analyze_rainfall_data(rainfall_data)
-        suggest_umbrella(chance_of_rain, user_location)
+        stations = fetch_stations()
+        closest_station_id = find_closest_station(user_location, stations)
+        rainfall_data = fetch_rainfall_data(closest_station_id)
+        chance_of_rain = analyze_rainfall_data(rainfall_data, closest_station_id)
+        suggest_umbrella(chance_of_rain)
     else:
         print("Unable to provide rainfall information without location.")
 

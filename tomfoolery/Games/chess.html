@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>♜ Chess PoC · full rules + timer</title>
+  <link rel="stylesheet" href="chess.css">
+</head>
+<body>
+  <div class="game-container">
+    <h1>♔ Chess PoC</h1>
+
+    <!-- timer panel -->
+    <div class="timer-panel">
+      <div class="timer white-timer">
+        <span class="player-label">⚪ White</span>
+        <span id="white-time">10:00</span>
+      </div>
+      <div class="timer black-timer">
+        <span class="player-label">⚫ Black</span>
+        <span id="black-time">10:00</span>
+      </div>
+    </div>
+
+    <!-- chess board will be injected by js -->
+    <div id="board" class="board"></div>
+
+    <!-- control buttons -->
+    <div class="action-bar">
+      <button id="undo-btn" class="btn">↩ Undo</button>
+      <button id="draw-btn" class="btn">🤝 Draw</button>
+      <button id="stalemate-btn" class="btn">⚖️ Stalemate</button>
+      <button id="reset-btn" class="btn">🔄 New game</button>
+    </div>
+
+    <!-- status message (check / checkmate / etc) -->
+    <div id="status" class="status">White's turn</div>
+
+    <!-- promotion modal (hidden by default) -->
+    <div id="promotion-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Choose promotion piece</h3>
+        <div class="promotion-choices">
+          <button class="piece-choice" data-piece="q">♕ Queen</button>
+          <button class="piece-choice" data-piece="r">♖ Rook</button>
+          <button class="piece-choice" data-piece="b">♗ Bishop</button>
+          <button class="piece-choice" data-piece="n">♘ Knight</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="chess.js"></script>
+</body>
+</html>
