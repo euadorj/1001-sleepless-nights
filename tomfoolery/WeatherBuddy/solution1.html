@@ -3,55 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Location on Google Maps</title>
-    <style>
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-    </style>
-    <h1>this is your location</h1>
-    <script>
-        function initMap() {
-            // Check if geolocation is available
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const userLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-
-                    // Create a map centered at the user's location
-                    const map = new google.maps.Map(document.getElementById('map'), {
-                        zoom: 15,
-                        center: userLocation
-                    });
-
-                    // Add a marker at the user's location
-                    new google.maps.Marker({
-                        position: userLocation,
-                        map: map,
-                        title: 'You are here!'
-                    });
-                }, function() {
-                    handleLocationError(true);
-                });
-            } else {
-                handleLocationError(false);
-            }
-        }
-
-        function handleLocationError(browserHasGeolocation) {
-            const errorMsg = browserHasGeolocation
-                ? 'Error: The Geolocation service failed.'
-                : 'Error: Your browser doesn\'t support geolocation.';
-            alert(errorMsg);
-        }
-    </script>
+    <title>Weather Station Locator & Rain Forecast</title>
+    <link rel="stylesheet" href="solution1.css">
 </head>
-<body onload="initMap()">
-    <div id="map"></div>
-    <!-- Replace YOUR_API_KEY with your actual API key from Google Cloud -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC3UCp_7vcRzDtejv-XyZgmA-pPHHEQB6s&callback=initMap"></script>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌦️ Weather Station Locator</h1>
+            <p>Find your nearest weather station and rain forecast</p>
+        </header>
+
+        <div class="status-section">
+            <div id="status" class="status-message">Loading your location...</div>
+            <button id="retryBtn" class="btn-retry" style="display: none;">Retry Location</button>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Map Section -->
+            <section class="section map-section">
+                <h2>Your Location & Nearest Weather Station</h2>
+                <div id="map" class="map-container"></div>
+            </section>
+
+            <!-- Weather Station Info
+            <section class="section station-info-section">
+                <h2>Nearest Weather Station</h2>
+                <div id="stationInfo" class="info-card">
+                    <p class="placeholder">Fetching station information...</p>
+                </div>
+            </section> -->
+
+            <!-- Rain Forecast -->
+            <section class="section rain-forecast-section">
+                <h2>5-Hour Rain Forecast</h2>
+                <div id="rainForecast" class="forecast-container">
+                    <p class="placeholder">Loading forecast data...</p>
+                </div>
+            </section>
+
+            <!-- Umbrella Recommendation -->
+            <section class="section umbrella-section">
+                <h2>Umbrella Recommendation</h2>
+                <div id="umbrellaRecommendation" class="recommendation-card">
+                    <p class="placeholder">Analyzing weather data...</p>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>Data provided by NEA (National Environment Agency)</p>
+            <p class="disclaimer">Location and weather data are for informational purposes only.</p>
+        </footer>
+    </div>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key="></script>
+    
+    <!-- Application Script -->
+    <script src="solution1.js"></script>
 </body>
 </html>

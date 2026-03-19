@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍎 Google Snake · fruit edition</title>
+    <link rel="stylesheet" href="snake.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <h1 class="game-title">🐍 google snake · fruit buffet</h1>
+
+        <!-- game canvas row + hints -->
+        <div class="canvas-panel">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div class="control-hint">
+                <p>← ↑ → ↓ move  •  window won't scroll</p>
+                <p class="pause-hint">⏸️ Press <kbd>SPACE</kbd> or <kbd>P</kbd> to pause</p>
+                <div class="fruit-legend">
+                    <span><span class="dot red"></span> +1</span>
+                    <span><span class="dot blue"></span> +5</span>
+                    <span><span class="dot yellow"></span> ⚡ speed +20% (20s)</span>
+                    <span><span class="dot orange"></span> ✨ double points (20s)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- active timers & score -->
+        <div class="stats-row">
+            <div class="score-box">🍬 score <span id="scoreDisplay">0</span></div>
+            <div class="timer-box" id="speedTimer">⚡ — s</div>
+            <div class="timer-box" id="doubleTimer">✨ — s</div>
+        </div>
+
+        <!-- pause overlay - now just a small badge -->
+        <div id="pauseOverlay" class="pause-badge">
+            ⏸️ PAUSED
+        </div>
+
+        <!-- game over overlay (hidden by default) -->
+        <div id="gameOverModal" class="modal-overlay">
+            <div class="modal-card">
+                <h2>🐍 game over</h2>
+                <p>your final score: <strong id="finalScoreSpan">0</strong></p>
+                <input type="text" id="playerNameInput" placeholder="enter your name" maxlength="20" autocomplete="off">
+                <button id="saveScoreBtn">save to leaderboard</button>
+                <button id="restartFromOverBtn">play again</button>
+            </div>
+        </div>
+
+        <!-- leaderboard -->
+        <div class="leaderboard-section">
+            <h3>🏆 leaderboard <span class="leaderboard-sub">(name | score | time)</span></h3>
+            <div id="leaderboardBody">
+                <table class="leaderboard-table">
+                    <thead><tr><th>name</th><th>score</th><th>time (s)</th></tr></thead>
+                    <tbody id="leaderboardRows"></tbody>
+                </table>
+            </div>
+            <button id="clearLeaderboardBtn" class="clear-btn">clear board</button>
+        </div>
+    </div>
+
+    <script src="snake.js"></script>
+    <!-- ensure arrow keys don't scroll -->
+    <script>
+        window.addEventListener('keydown', function(e) {
+            if (e.key.startsWith('Arrow')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
