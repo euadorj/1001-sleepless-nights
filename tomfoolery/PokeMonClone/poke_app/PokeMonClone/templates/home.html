@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Game</title>
+    <link rel="stylesheet" href="{% static 'home.css' %}"> <!-- Link to your CSS file -->
+</head>
+<body>
+    <div id="main-menu">
+        <h1>Welcome to the Pokemon Game</h1>
+        <button onclick="startNewGame()">New Game</button>
+        <button onclick="loadGame()">Load Game</button>
+        <button onclick="exitGame()">Exit</button>
+    </div>
+
+    <div id="pokemon-selection" style="display:none;">
+        <h2>Select Your Pokemon</h2>
+        <div id="pokemon-list"></div>
+        <button id="confirm-selection" style="display:none;" onclick="confirmSelection()">Confirm Selection</button>
+    </div>
+
+    <script src="home.js"></script> <!-- Link to your JavaScript file -->
+</body>
+</html>
